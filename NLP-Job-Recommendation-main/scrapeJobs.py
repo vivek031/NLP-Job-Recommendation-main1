@@ -1,6 +1,3 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-
 from bs4 import BeautifulSoup
 from time import sleep
 from skill_list import skills
@@ -31,7 +28,9 @@ def do():
     wrong = []
     
     db = client['jobs']
-    db.create_collection('narkuri')
+    print("hi")
+    print(db)
+    db.create_collection("narkuri")
     print("Database created........")
 
     t = 0
