@@ -4,32 +4,74 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Job Recommendation </title>
+    <title>Job Recommendation</title>
 
     <style>
-
-        body{
-            background-image: linear-gradient(to left,#ad5389,#3c1053);
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #4e54c8, #8f94fb);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
 
+        .container {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
 
+        h1 {
+            margin-top: 0;
+            color: #333;
+        }
 
+        input[type="text"] {
+            font-size: 18px;
+            padding: 10px;
+            width: 70%;
+            border: none;
+            border-bottom: 2px solid #333;
+            margin-bottom: 20px;
+            transition: border-bottom 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-bottom: 2px solid #4e54c8;
+        }
+
+        button {
+            font-size: 18px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4e54c8;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #333;
+        }
     </style>
 
 </head>
 <body>
 
-    <div style="text-align: center; margin-top: 15%; ">
+    <div class="container">
+        <h1>NLP Job Recommendation</h1>
+        <form method="POST">
+            <input type="text" name="text"  placeholder="Enter your search here..." >
+            <button type="submit">Search</button>
+        </form>
+    </div>
 
-        <h1 style="margin-left: -6%; color: white;"><b> NLP Job Recommendation </b></h1>
-            <div>
-                <form method="POST">
-                    <input style="font-size: 18pt; height: 200px; width:600px;border: 2px solid white;" name="text">
-                    <button type="submit"  style="height: 50px; width:100px; border: 2px solid white;"> SEARCH </button>
-                </form>
-        
-            </div>
-        </div>
-        
 </body>
 </html>

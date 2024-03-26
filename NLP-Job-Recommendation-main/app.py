@@ -10,20 +10,25 @@ app = Flask(__name__)
 def extract_information_from_user(text):
     key=[]
     value=[]
+    # nlp = spacy.load("./output/model-best/")
+
     print("hi")
-    nlp = spacy.load("C:/Users/vivek/OneDrive/Desktop/All folder/8th sem/project/NLP-Job-Recommendation-main/NLP-Job-Recommendation-main/output/model-best")
+    nlp = spacy.load("/home/mukesh/project/NLP-Job-Recommendation-main1/NLP-Job-Recommendation-main/output/model-best/")
     print("nlp is ",nlp)
     doc = nlp(text)
+
     print("heolo")
     print(doc)
     for ent in doc.ents:
         key.append(ent.label_)
         value.append(ent.text)
+
     print(key)
     print(value)
     Dict = {key[i]: value[i] for i in range(len(key))}
 
     SKILLS= text.split(",")
+
     print(SKILLS)
     Dict.update(SKILLS=SKILLS)
 
