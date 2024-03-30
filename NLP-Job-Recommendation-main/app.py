@@ -23,8 +23,8 @@ def extract_information_from_user(text):
     # nlp = spacy.load("./output/model-best/")
 
     print("hi")
-    #nlp = spacy.load("C:/Users/vivek/OneDrive/Desktop/All folder/8th sem/project/NLP-Job-Recommendation-main/NLP-Job-Recommendation-main/output/model-best")
-    print("nlp is ",nlp)
+    nlp = spacy.load("/home/mukesh/project/NLP-Job-Recommendation-main1/NLP-Job-Recommendation-main/output/model-best")
+    # print("nlp is ",nlp)
     doc = model(text)
     print("heolo")
     print(doc)
