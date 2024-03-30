@@ -3,40 +3,32 @@ from pymongo import MongoClient
 import pymongo
 import operator
 import spacy
-import keras_nlp
+import nltk
 
 app = Flask(__name__)
 
 #EXTRACT SKILLS FROM THE GIVEN TEXT
 def extract_information_from_user(text):
-    model = keras_nlp.models.WhisperBackbone(
-    vocabulary_size=51864,
-    num_layers=4,
-    num_heads=4,
-    hidden_dim=256,
-    intermediate_dim=512,
-    max_encoder_sequence_length=128,
-    max_decoder_sequence_length=128,
-    )
+    
     key=[]
     value=[]
     # nlp = spacy.load("./output/model-best/")
-
-    print("hi")
-    nlp = spacy.load("/home/mukesh/project/NLP-Job-Recommendation-main1/NLP-Job-Recommendation-main/output/model-best")
-    # print("nlp is ",nlp)
-    doc = model(text)
+    SKILLS= nltk.word_tokenize(text)
+    #print("hi")
+    #nlp = spacy.load("C:/Users/vivek/OneDrive/Desktop/All folder/8th sem/project/NLP-Job-Recommendation-main/NLP-Job-Recommendation-main/output/model-best")
+    #print("nlp is ",nlp)
+    # doc = model(text)
     print("heolo")
-    print(doc)
-    for ent in doc.ents:
+   # print(doc)
+    """for ent in doc.ents:
         key.append(ent.label_)
         value.append(ent.text)
-
-    print(key)
-    print(value)
+"""
+    #print(key)
+    #print(value)
     Dict = {key[i]: value[i] for i in range(len(key))}
 
-    SKILLS= doc.split(",")
+    #SKILLS= doc.split(",")
     print(SKILLS)
     Dict.update(SKILLS=SKILLS)
 
