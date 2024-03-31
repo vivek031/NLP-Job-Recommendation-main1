@@ -4,7 +4,8 @@ import pymongo
 import operator
 import spacy
 import nltk
-
+from trie import insertList,filtered_skills
+insertList()
 app = Flask(__name__)
 
 #EXTRACT SKILLS FROM THE GIVEN TEXT
@@ -13,7 +14,10 @@ def extract_information_from_user(text):
     key=[]
     value=[]
     # nlp = spacy.load("./output/model-best/")
-    SKILLS= nltk.word_tokenize(text)
+    tokens= nltk.word_tokenize(text)
+    stopwords = nltk.corpus.stopwords.words('english')
+    SKILLS = [word for word in tokens if word not in stopwords]
+    SKILLS=filtered_skills(SKILLS)
     #print("hi")
     #nlp = spacy.load("C:/Users/vivek/OneDrive/Desktop/All folder/8th sem/project/NLP-Job-Recommendation-main/NLP-Job-Recommendation-main/output/model-best")
     #print("nlp is ",nlp)
