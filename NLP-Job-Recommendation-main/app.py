@@ -5,6 +5,8 @@ import operator
 import spacy
 import nltk
 from trie import insertList,filtered_skills
+import PyPDF2
+import re
 insertList()
 app = Flask(__name__)
 
@@ -22,7 +24,6 @@ def extract_information_from_user(text):
     #nlp = spacy.load("C:/Users/vivek/OneDrive/Desktop/All folder/8th sem/project/NLP-Job-Recommendation-main/NLP-Job-Recommendation-main/output/model-best")
     #print("nlp is ",nlp)
     # doc = model(text)
-    print("heolo")
    # print(doc)
     """for ent in doc.ents:
         key.append(ent.label_)
@@ -45,12 +46,15 @@ def extract_information_from_user(text):
 def retirve_info_from_db(user_list):
 
     len_user_list = len(user_list)
+    print("len user list",len_user_list)
+    print(mydb)
     n = mydb.find( { 'skills': { '$in': user_list}} ,{'_id':0}) #COLLECTING JOBS BASED ON MATCHING SKILLS
-
+    print("jbos are",n)
     jobs = []
     for i in n:
 
         job_skills = i['skills']
+        print("skills ",job_skills)
 
         match = len([k for k , val in enumerate(job_skills) if val in user_list])
         
@@ -67,16 +71,49 @@ def show_info(jobs , job_skills , job_len):
     return render_template('show_job.html' , jobs=jobs , job_skills=job_skills , job_len=job_len)
  
 
+def extract_text_from_pdf(file):
+    # Create a PDF file reader object
+    pdf_reader = PyPDF2.PdfReader(file)
+    
+    # Initialize an empty string to store extracted text
+    text = ""
+    
+    # Iterate through each page of the PDF
+    for page in pdf_reader.pages:
+        # Extract text from the current page
+        # page = pdf_reader.getPage(page_num)
+        page_text = page.extract_text()
+        page_text = re.sub(r'[^a-zA-Z\s]', '', page_text)
+        text+=page_text
+
+    
+    # Close the PDF file
+    file.close()
+    
+    return text
+
+
 @app.route('/')
 def hello():
     return render_template('index.html')
 
 @app.route('/', methods=['POST'])
-def my_form_post():
-    text = request.form['text']
-    print("fahfakshfaskhfask   ",text)
+# def my_form_post():
+#     text = request.form['text']
+#     print("fahfakshfaskhfask   ",text)
 
-    return extract_information_from_user(text)    
+#     return extract_information_from_user(text)    
+def my_form_post():
+    print("response is ",request)
+    if 'resume' in request.files:  # Check if a file is uploaded
+        uploaded_file = request.files['resume']
+        if uploaded_file.filename != '':
+            file_text = extract_text_from_pdf(uploaded_file)
+            print(file_text)
+            return extract_information_from_user(file_text)
+    elif 'text' in request.form:  # Check if text is entered manually
+        text = request.form['text']
+        return extract_information_from_user(text)
 
 
 if __name__ == "__main__":

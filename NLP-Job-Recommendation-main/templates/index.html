@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Recommendation</title>
 
+    <link rel="stylesheet" type="text/css" href="../css/index.css">
     <style>
         body {
             margin: 0;
@@ -24,6 +25,7 @@
             background: rgba(255, 255, 255, 0.9);
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            width: 60%; /* Adjusted width */
         }
 
         h1 {
@@ -32,14 +34,22 @@
         }
 
         input[type="text"] {
-            font-size: 18px;
-            padding: 10px;
-            width: 70%;
-            border: none;
-            border-bottom: 2px solid #333;
-            margin-bottom: 20px;
-            transition: border-bottom 0.3s ease;
-        }
+    font-size: 18px;
+    padding: 20px 10px; /* Adjusted padding */
+    width: calc(100% - 20px); /* Adjusted width */
+    height: 200px; /* Adjusted height */
+    border: none;
+    border-bottom: 2px solid #333;
+    margin-bottom: 20px;
+    transition: border-bottom 0.3s ease;
+    resize: none; /* Disable resizing */
+    text-align: left; /* Align text to the left */
+    vertical-align: top; /* Align text to the top */
+    line-height: normal; /* Adjust line height */
+}
+
+
+
 
         input[type="text"]:focus {
             outline: none;
@@ -60,6 +70,36 @@
         button:hover {
             background-color: #333;
         }
+
+        .or-divider {
+            font-size: 24px;
+            margin: 20px 0;
+            color: #333;
+        }
+
+        #resumeInput {
+            display: none;
+        }
+
+        .upload-button {
+            font-size: 18px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4e54c8;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .upload-button:hover {
+            background-color: #333;
+        }
+
+        .custom-file-upload {
+            display: inline-block;
+            cursor: pointer;
+        }
     </style>
 
 </head>
@@ -67,11 +107,25 @@
 
     <div class="container">
         <h1>NLP Job Recommendation</h1>
-        <form method="POST">
-            <input type="text" name="text"  placeholder="Enter your search here..." >
+        <form id="myForm" method="POST" enctype="multipart/form-data">
+            <input type="text" name="text" placeholder="Enter your summary/skills here...">
+            <br>
             <button type="submit">Search</button>
         </form>
+        <div class="or-divider">OR</div>
+        <label for="resumeInput" class="custom-file-upload upload-button">
+            Upload Resume
+        </label>
+        <form id="resumeForm" method="POST" enctype="multipart/form-data" style="display: none;">
+            <input type="file" name="resume" id="resumeInput" accept=".pdf">
+        </form>
     </div>
+
+    <script>
+        document.getElementById('resumeInput').addEventListener('change', function() {
+            document.getElementById('resumeForm').submit();
+        });
+    </script>
 
 </body>
 </html>
