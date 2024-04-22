@@ -17,6 +17,8 @@ def extract_information_from_user(text):
     value=[]
     # nlp = spacy.load("./output/model-best/")
     tokens= nltk.word_tokenize(text)
+    tokens = list(set(tokens))
+
     stopwords = nltk.corpus.stopwords.words('english')
     SKILLS = [word for word in tokens if word not in stopwords]
     SKILLS=filtered_skills(SKILLS)
