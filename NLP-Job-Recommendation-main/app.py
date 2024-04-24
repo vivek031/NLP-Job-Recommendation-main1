@@ -42,29 +42,56 @@ def extract_information_from_user(text):
     text = Dict["SKILLS"]
     print(text)
 
-    return retirve_info_from_db(text)
+    return retrieve_info_from_db(text)
 
 #RETRIVE RELATED JOBS BASED ON JACCARD COEFFICIENT 
-def retirve_info_from_db(user_list):
 
+# Function to retrieve information from the database and calculate expected salary
+def retrieve_info_from_db(user_list):
     len_user_list = len(user_list)
-    print("len user list",len_user_list)
-    print(mydb)
-    n = mydb.find( { 'skills': { '$in': user_list}} ,{'_id':0}) #COLLECTING JOBS BASED ON MATCHING SKILLS
-    print("jbos are",n)
+    print("Length of user list:", len_user_list)
+
+    # Assuming 'mydb' is your database connection object
+    # Replace 'mydb' with your actual database connection object
+    # You need to query your database here to get jobs based on matching skills
+    # Modify this part based on your database structure and querying method
+    # The result 'n' should contain jobs that match the user's skills
+    jobsmatched = mydb.find({'skills': {'$in': user_list}}, {'_id': 0})
+    # noOfjobs = jobsmatched.count_documents()
+    # print("Number of Jobs Retrieved:", noOfjobs)
+
+
     jobs = []
-    for i in n:
-
+    for i in jobsmatched:
         job_skills = i['skills']
-        print("skills ",job_skills)
+        print("Skills for job:", job_skills)
 
-        match = len([k for k , val in enumerate(job_skills) if val in user_list])
-        
+        match = len([k for k, val in enumerate(job_skills) if val in user_list])
         total_len = len(job_skills) + len_user_list 
-        i['rank'] = match/total_len #RANKING COEFFICIENT
+        i['rank'] = match / total_len  # RANKING COEFFICIENT
+
+        # Calculate expected salary for the current job
+        salary = calculate_expected_salary(i['skills'], i['salary'], user_list, 1/2, i['rank'])
+        i['expected_salary'] = salary
+
         jobs.append(i)
 
-    return show_info(jobs , user_list , len(jobs))
+
+    return show_info(jobs, user_list, len(jobs))
+
+# Function to calculate expected salary for a job based on the algorithm discussed earlier
+def calculate_expected_salary(job_skills, job_salary, user_skills, θs, w):
+    match_count = len([skill for skill in job_skills if skill in user_skills])
+    total_len = len(job_skills) + len(user_skills)
+    probability = 1 / (1 + (1 / (1 + w * ((match_count / len(job_skills)) - 1/2))))
+    
+    if match_count / len(job_skills) >= θs:
+        return probability * job_salary
+    else:
+        return 0  # Return 0 if the job does not meet the qualification threshold
+
+
+
 
 #SORT THE JOBS RANK WISE AND DISPLAY
 def show_info(jobs , job_skills , job_len):
