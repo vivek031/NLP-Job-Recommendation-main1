@@ -2,13 +2,20 @@ from flask import Flask , render_template , url_for , redirect , abort , request
 from pymongo import MongoClient
 import pymongo
 import operator
-import spacy
+# import spacy
 import nltk
 from trie import insertList,filtered_skills
 import PyPDF2
 import re
+import math
+from mlxtend.frequent_patterns import apriori
+# from mlxtend.frequent_patterns import association_rules
+import pandas as pd
+
 insertList()
 app = Flask(__name__)
+
+
 
 #EXTRACT SKILLS FROM THE GIVEN TEXT
 def extract_information_from_user(text):
@@ -51,15 +58,11 @@ def retrieve_info_from_db(user_list):
     len_user_list = len(user_list)
     print("Length of user list:", len_user_list)
 
-    # Assuming 'mydb' is your database connection object
-    # Replace 'mydb' with your actual database connection object
-    # You need to query your database here to get jobs based on matching skills
-    # Modify this part based on your database structure and querying method
-    # The result 'n' should contain jobs that match the user's skills
     jobsmatched = mydb.find({'skills': {'$in': user_list}}, {'_id': 0})
     # noOfjobs = jobsmatched.count_documents()
     # print("Number of Jobs Retrieved:", noOfjobs)
-
+    
+    frequent_skills_sets = findfrequentskillset()
 
     jobs = []
     for i in jobsmatched:
@@ -73,6 +76,8 @@ def retrieve_info_from_db(user_list):
         # Calculate expected salary for the current job
         salary = calculate_expected_salary(i['skills'], i['salary'], user_list, 1/2, i['rank'])
         i['expected_salary'] = salary
+        difficulty=estimate_difficulty(user_list, job_skills, frequent_skills_sets)
+        i['difficulty']=difficulty
 
         jobs.append(i)
 
@@ -120,6 +125,62 @@ def extract_text_from_pdf(file):
     file.close()
     
     return text
+
+def findfrequentskillset():
+    job_listings = mydb.find({}, {"_id": 0, "skills": 1})
+
+# Extract skills
+    all_skills = []
+    for job in job_listings:
+        all_skills.append(job.get("skills", []))
+
+    # Flatten the list of skills
+    flattened_skills = [skill for sublist in all_skills for skill in sublist]
+
+    # Convert the list of skills to a dataframe
+    df = pd.DataFrame(flattened_skills, columns=["Skill"])
+
+    # Convert the dataframe to a one-hot encoded format
+    one_hot_encoded = pd.get_dummies(df)
+
+    # Find frequent itemsets using Apriori algorithm
+    frequent_itemsets = apriori(one_hot_encoded, min_support=0.1, use_colnames=True)
+
+    # Print frequent itemsets
+    return frequent_itemsets
+
+def estimate_difficulty(user_skills, job_skills, frequent_skill_sets):
+    # Initialize empty sets
+    edges = {i: set() for i in range(len(frequent_skill_sets))}
+    active_skills = {i: set() for i in user_skills}
+    
+    # Create edges between frequent skill sets
+    for j, frequent_set in enumerate(frequent_skill_sets):
+        for skill in frequent_set:
+            i = frequent_skill_sets.index(frequent_set.difference({skill}))
+            edges[i].add((i, j, skill))
+    
+    # Initialize active sets
+    for edge in edges[0]:
+        active_skills[edge[2]].add(edge)
+    
+    # Estimate overall difficulty
+    overall_difficulty = 0
+    max_difficulty = len(job_skills)  # Maximum possible difficulty
+    
+    for job_skill in job_skills:
+        di = math.inf
+        for edge in active_skills[job_skill]:
+            start, end, skill = edge
+            di = min(di, 1.0)  # Assuming a fixed difficulty value of 1 for each skill
+        overall_difficulty += di
+    
+    # Normalize overall difficulty to range [0, 1]
+    normalized_difficulty = overall_difficulty / max_difficulty
+    
+    return normalized_difficulty
+
+
 
 
 @app.route('/')
