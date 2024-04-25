@@ -46,6 +46,21 @@ def extract_information_from_user(text):
 
 #RETRIVE RELATED JOBS BASED ON JACCARD COEFFICIENT 
 
+def expected_salary(salary):
+    l=len(salary)
+    sum=0
+    value=0
+    for i in range(0,l):
+        if(salary[i]=='-'):
+            sum+=value
+            value=0
+        elif(salary[i]>='0' and salary[i]<='9'):
+            value=value*10+int(salary[i])-int('0') 
+    if value!=0 and sum!=0:
+        return (value+sum)/2
+    else:
+        return value 
+ 
 # Function to retrieve information from the database and calculate expected salary
 def retrieve_info_from_db(user_list):
     len_user_list = len(user_list)
@@ -71,9 +86,16 @@ def retrieve_info_from_db(user_list):
         i['rank'] = match / total_len  # RANKING COEFFICIENT
 
         # Calculate expected salary for the current job
-        salary = calculate_expected_salary(i['skills'], i['salary'], user_list, 1/2, i['rank'])
-        i['expected_salary'] = salary
-
+        #print(i)
+        temp_salary=(str)(i['salary'])
+        #print(temp_salary)
+        if(expected_salary(temp_salary)==0):
+            i['expected_salary']="cann't predict"
+        else:
+            print(expected_salary(temp_salary))
+            salary = calculate_expected_salary(i['skills'], expected_salary(temp_salary), user_list, 1/2, i['rank'])
+            i['expected_salary'] = salary
+        
         jobs.append(i)
 
 
