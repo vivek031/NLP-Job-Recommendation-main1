@@ -58,8 +58,11 @@
         
         {% for item in jobs %}
         <div id="job">
-            {% for i in item.values() %}
+            <!---{% for i in item.values() %}
                 <p>{{ i }}</p>
+            {% endfor %}--->
+            {%for i in item %}
+                <p>{{ i }} : {{item[i]}}</p>
             {% endfor %}
         </div>
         {% endfor %}

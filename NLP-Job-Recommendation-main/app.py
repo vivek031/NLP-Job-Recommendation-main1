@@ -76,9 +76,12 @@ def retrieve_info_from_db(user_list):
     jobsmatched = mydb.find({'skills': {'$in': user_list}}, {'_id': 0})
     # noOfjobs = jobsmatched.count_documents()
     # print("Number of Jobs Retrieved:", noOfjobs)
-    
-    frequent_skills_sets = findfrequentskillset()
-
+    temp=jobsmatched
+    print(temp)
+    print("hello")
+    frequent_skills_sets = findfrequentskillset(user_list)
+    print(temp)
+    print("completed")
     jobs = []
     for i in jobsmatched:
         job_skills = i['skills']
@@ -91,6 +94,7 @@ def retrieve_info_from_db(user_list):
         # Calculate expected salary for the current job
         
         difficulty=estimate_difficulty(user_list, job_skills, frequent_skills_sets)
+        print(difficulty)
         i['difficulty']=difficulty
 
         #print(i)
@@ -99,13 +103,13 @@ def retrieve_info_from_db(user_list):
         if(expected_salary(temp_salary)==0):
             i['expected_salary']="cann't predict"
         else:
-            print(expected_salary(temp_salary))
+            #print(expected_salary(temp_salary))
             salary = calculate_expected_salary(i['skills'], expected_salary(temp_salary), user_list, 1/2, i['rank'])
             i['expected_salary'] = salary
         
         jobs.append(i)
 
-
+    print("loop")
     return show_info(jobs, user_list, len(jobs))
 
 # Function to calculate expected salary for a job based on the algorithm discussed earlier
@@ -150,14 +154,16 @@ def extract_text_from_pdf(file):
     
     return text
 
-def findfrequentskillset():
-    job_listings = mydb.find({}, {"_id": 0, "skills": 1})
+def findfrequentskillset(user_list):
+    print("hello vivek")
+    job_listings = mydb.find({'skills': {'$in': user_list}}, {'_id': 0})
+    #job_listings = mydb.find({}, {"_id": 0, "skills": 1})
 
 # Extract skills
     all_skills = []
     for job in job_listings:
-        all_skills.append(job.get("skills", []))
-
+        all_skills.append(job["skills"])
+    #print(all_skills)
     # Flatten the list of skills
     flattened_skills = [skill for sublist in all_skills for skill in sublist]
 
@@ -168,21 +174,42 @@ def findfrequentskillset():
     one_hot_encoded = pd.get_dummies(df)
 
     # Find frequent itemsets using Apriori algorithm
-    frequent_itemsets = apriori(one_hot_encoded, min_support=0.1, use_colnames=True)
+    frequent_itemsets = apriori(one_hot_encoded, min_support=0.001, use_colnames=True)
+    print ("frequent")
+    print(frequent_itemsets)
+    frequent_itemsets_list = []
+
+    for _ , itemset in frequent_itemsets.iterrows():
+        item=str((set(itemset['itemsets'])))
+        print(item[8:-2])
+        frequent_itemsets_list.append(item[8:-2])
+
+
+    
+    
+    print(frequent_itemsets_list)
 
     # Print frequent itemsets
-    return frequent_itemsets
+    return frequent_itemsets_list
 
 def estimate_difficulty(user_skills, job_skills, frequent_skill_sets):
     # Initialize empty sets
     edges = {i: set() for i in range(len(frequent_skill_sets))}
-    active_skills = {i: set() for i in user_skills}
     
-    # Create edges between frequent skill sets
-    for j, frequent_set in enumerate(frequent_skill_sets):
-        for skill in frequent_set:
-            i = frequent_skill_sets.index(frequent_set.difference({skill}))
-            edges[i].add((i, j, skill))
+    # Map all skills to unique identifiers
+    all_skills = set(user_skills + job_skills + frequent_skill_sets)
+    skill_to_id = {skill: idx for idx, skill in enumerate(all_skills)}
+    
+    # Convert frequent_skill_sets to sets of single skills
+    frequent_skill_sets = [set([skill]) for skill in frequent_skill_sets]
+    
+    active_skills = {skill_id: set() for skill_id in skill_to_id.values()}
+    
+    # Create edges between frequent skills
+    for j, frequent_skill in enumerate(frequent_skill_sets):
+        for skill in frequent_skill:
+            i = frequent_skill_sets.index(set([skill]))
+            edges[i].add((i, j, skill_to_id[skill]))  # Use skill_id instead of skill
     
     # Initialize active sets
     for edge in edges[0]:
@@ -194,15 +221,18 @@ def estimate_difficulty(user_skills, job_skills, frequent_skill_sets):
     
     for job_skill in job_skills:
         di = math.inf
-        for edge in active_skills[job_skill]:
-            start, end, skill = edge
+        for edge in active_skills.get(skill_to_id.get(job_skill, None), set()):
+            start, end, skill_id = edge
+        
             di = min(di, 1.0)  # Assuming a fixed difficulty value of 1 for each skill
-        overall_difficulty += di
-    
+        if(di!= math.inf):
+            overall_difficulty += di
+    print(max_difficulty)
     # Normalize overall difficulty to range [0, 1]
     normalized_difficulty = overall_difficulty / max_difficulty
     
     return normalized_difficulty
+
 
 
 
